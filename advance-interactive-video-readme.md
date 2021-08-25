@@ -7,7 +7,7 @@ To install the additional features such as the Kaltura, Youtube and Vimeo Pro pl
 ```
 # For Kaltura integration:-
 
-Please Enter your Login details in KalturaGeneratedAPIClientsPHP/get-kaltura-playlist.php.
+Please Enter your Kaltura Credentials like 'secret', partnerId, expiry, privileges and sessionType inside KalturaGeneratedAPIClientsPHP/GetKalturaMediaEntry.php.
 
 #For Youtube and Vimeo Pro Integration:-
 
