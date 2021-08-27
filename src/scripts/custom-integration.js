@@ -77,6 +77,7 @@ H5PEditor.widgets.interactiveVideo = H5PEditor.InteractiveVideo = (function (
         }
       };
       var totalVideoCount;
+      var kalturaPageLength = 5;
       async function getPlaylistData(pageSize, pageIndex, searchText) {
         let getDirectory = window.H5PIntegration.loadedJs;
         let fullDirectoryPath;
@@ -86,6 +87,7 @@ H5PEditor.widgets.interactiveVideo = H5PEditor.InteractiveVideo = (function (
             return false;
           }
         });
+
         let h5pDirectoryPath = fullDirectoryPath.split("src");
         $.ajax({
           type: "GET",
@@ -95,7 +97,7 @@ H5PEditor.widgets.interactiveVideo = H5PEditor.InteractiveVideo = (function (
             pageIndex: pageIndex,
             searchText: searchText,
           },
-          url: h5pDirectoryPath[0] + "KalturaGeneratedAPIClientsPHP/GetKalturaMediaEntry.php",
+          url: h5pDirectoryPath[0] + "KalturaGeneratedAPIClientsPHP/get-kaltura-playlist.php",
           success: function (data) {
             // data = $.parseJSON(data);
             // console.log(data);
@@ -143,27 +145,32 @@ H5PEditor.widgets.interactiveVideo = H5PEditor.InteractiveVideo = (function (
         //set the value of our hidden input fields
         $("#current_page").val(0);
         $("#show_per_page").val(show_per_page);
-
-        //now when we got all we need for the navigation let's make it '
-
-        var navigation_html =
-          '<li class="page-item"><a class="previous_link page-link" href="javascript:void(0);">Prev</a></li>';
-        var current_link = 0;
-        // while (number_of_pages > current_link) {
-        //   navigation_html +=
-        //     '<li class="page-item page_item" longdesc="' +
-        //     current_link +
-        //     '"><a class="page_link page-link"' +
-        //     'href="javascript:void(0)">' +
-        //     (current_link + 1) +
-        //     "</a></li>";
-        //   current_link++;
-        // }
-        navigation_html +=
-          '<li class="page-item"><a class="next_link page-link" href="javascript:void(0);">Next</a></li>';
-        $("#" + listWraper).html(navigation_html);
-        //add active class to the first page link
-        $("#" + listWraper + " .page_item:first").addClass("active");
+        if (videoCountNumber > kalturaPageLength) {
+          //now when we got all we need for the navigation let's make it '
+          if (listIndex == 0) {
+            var navigation_html =
+            '<li class="page-item"><a style="display:none;" class="previous_link page-link" href="javascript:void(0);">Prev</a></li>';
+          } else {
+            var navigation_html =
+            '<li class="page-item"><a class="previous_link page-link" href="javascript:void(0);">Prev</a></li>';
+          }
+          var current_link = 0;
+          // while (number_of_pages > current_link) {
+          //   navigation_html +=
+          //     '<li class="page-item page_item" longdesc="' +
+          //     current_link +
+          //     '"><a class="page_link page-link"' +
+          //     'href="javascript:void(0)">' +
+          //     (current_link + 1) +
+          //     "</a></li>";
+          //   current_link++;
+          // }
+          navigation_html +=
+            '<li class="page-item"><a class="next_link page-link" href="javascript:void(0);">Next</a></li>';
+          $("#" + listWraper).html(navigation_html);
+          //add active class to the first page link
+          $("#" + listWraper + " .page_item:first").addClass("active");
+        }
         //hide all the elements inside pagingBox div
         $("#modalContent").children().css("display", "none");
         //and show the first n (show_per_page) elements
@@ -196,25 +203,35 @@ H5PEditor.widgets.interactiveVideo = H5PEditor.InteractiveVideo = (function (
         $("#current_page").val(page_num);
       }
       var youtubeNextPageFlag;
-      var youtubePrevFlag;
+      var listIndex = 0;
       function handlePagination(perPageItem, videoCountNumber, listWraper) {
         addPagination(perPageItem, videoCountNumber, listWraper);
-        $(document).on(
-          "click",
-          "#" + listWraper + " .previous_link",
-          function () {
+        $(document).on("click", "#" + listWraper + " .previous_link",
+          function (e) {
             new_page = parseInt($("#current_page").val()) - 1;
             //if there is an item before the current active link run the function
             // if ($(".active").prev("#" + listWraper + " .page_item").length == true) {
             go_to_page(new_page, listWraper);
-            var listIndex = new_page + 1;
+            listIndex = new_page + 1;
+            console.log(listIndex)
+            if (listIndex == 1) {
+              $(this).css("display", "none");
+            }
+            if (listIndex >= 1) {
+              $("#"+listWraper + " .next_link").css("display", "block");
+            }
+            if (listIndex == 0) {
+              $("#"+listWraper + " .previous_link").css("display", "none");
+              e.preventDefault();
+              return false;
+            }
             if (listWraper == "page_navigation") {
               if ($("#input-playlist").val() == "") {
-                getPlaylistData(5, listIndex, "");
+                getPlaylistData(kalturaPageLength, listIndex, "");
               }
               if ($("#input-playlist").val() != "") {
                 var searchText = $("#input-playlist").val();
-                getPlaylistData(5, listIndex, searchText);
+                getPlaylistData(kalturaPageLength, listIndex, searchText);
               }
             }
             if (listWraper == "youtube_navigation") {
@@ -237,15 +254,15 @@ H5PEditor.widgets.interactiveVideo = H5PEditor.InteractiveVideo = (function (
 
         $(document).on("click", "#" + listWraper + " .page_item", function () {
           var pageNumber = $(this).attr("longdesc");
-          var listIndex = $(this).text();
+          listIndex = $(this).text();
           go_to_page(pageNumber, listWraper);
           if (listWraper == "page_navigation") {
             if ($("#input-playlist").val() == "") {
-              getPlaylistData(5, listIndex, "");
+              getPlaylistData(kalturaPageLength, listIndex, "");
             }
             if ($("#input-playlist").val() != "") {
               var searchText = $("#input-playlist").val();
-              getPlaylistData(5, listIndex, searchText);
+              getPlaylistData(kalturaPageLength, listIndex, searchText);
             }
           }
           if (listWraper == "youtube_navigation") {
@@ -255,18 +272,30 @@ H5PEditor.widgets.interactiveVideo = H5PEditor.InteractiveVideo = (function (
         });
 
         $(document).on("click", "#" + listWraper + " .next_link", function () {
+          if (listIndex == 0) {
+            $("#"+listWraper + " .previous_link").css("display", "block");
+          }
           new_page = parseInt($("#current_page").val()) + 1;
           //if there is an item after the current active link run the function
           // if ($(".active").next("#" + listWraper + " .page_item").length == true) {
           go_to_page(new_page, listWraper);
-          var listIndex = new_page + 1;
+          listIndex = new_page + 1;
+          var getTotalListCount = totalVideoCount/kalturaPageLength;
+          var getEjectTotal = Math.ceil(getTotalListCount);
+          if (getEjectTotal == listIndex) {
+            $(this).css("display", "none");
+            // return false;
+          }
+          if (listIndex >=2) {
+            $("#"+listWraper + " .previous_link").css("display", "block");
+          }
           if (listWraper == "page_navigation") {
             if ($("#input-playlist").val() == "") {
-              getPlaylistData(5, listIndex, "");
+              getPlaylistData(kalturaPageLength, listIndex, "");
             }
             if ($("#input-playlist").val() != "") {
               var searchText = $("#input-playlist").val();
-              getPlaylistData(5, listIndex, searchText);
+              getPlaylistData(kalturaPageLength, listIndex, searchText);
             }
           }
           if (listWraper == "youtube_navigation") {
@@ -287,29 +316,29 @@ H5PEditor.widgets.interactiveVideo = H5PEditor.InteractiveVideo = (function (
         });
       }
 
-      getPlaylistData(5, 0, "");
+      getPlaylistData(kalturaPageLength, listIndex, "");
       setTimeout(function () {
-        handlePagination(5, totalVideoCount, "page_navigation");
+        handlePagination(kalturaPageLength, totalVideoCount, "page_navigation");
       }, 3000);
       $(document).on("keyup", "#input-playlist", function () {
         var searchText = $(this).val();
-        getPlaylistData(5, 0, searchText);
+        getPlaylistData(kalturaPageLength, listIndex, searchText);
         setTimeout(function () {
-          handlePagination(5, totalVideoCount, "page_navigation");
+          handlePagination(kalturaPageLength, totalVideoCount, "page_navigation");
         }, 3000);
       });
 
       $(document).on("click", "#kaltura", function () {
-        getPlaylistData(5, 0, "");
+        getPlaylistData(kalturaPageLength, listIndex, "");
         setTimeout(function () {
           $(".kaltura-pagination").html("");
-          handlePagination(5, totalVideoCount, "page_navigation");
+          handlePagination(kalturaPageLength, totalVideoCount, "page_navigation");
         }, 3000);
         $(document).on("keyup", "#input-playlist", function () {
           var searchText = $(this).val();
-          getPlaylistData(5, 0, searchText);
+          getPlaylistData(kalturaPageLength, listIndex, searchText);
           setTimeout(function () {
-            handlePagination(5, totalVideoCount, "page_navigation");
+            handlePagination(kalturaPageLength, totalVideoCount, "page_navigation");
           }, 3000);
         });
       });
