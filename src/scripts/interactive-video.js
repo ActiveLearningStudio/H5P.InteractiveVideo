@@ -12,6 +12,7 @@ const $ = H5P.jQuery;
 const SECONDS_IN_MINUTE = 60;
 const MINUTES_IN_HOUR = 60;
 const KEYBOARD_STEP_LENGTH_SECONDS = 5;
+var stateScore = 1;
 
 /**
  * @typedef {Object} InteractiveVideoParameters
@@ -40,6 +41,7 @@ function InteractiveVideo(params, id, contentData) {
   var self = this;
   var startAt;
   var loopVideo;
+ 
 
   // Inheritance
   H5P.EventDispatcher.call(self);
@@ -451,6 +453,7 @@ function InteractiveVideo(params, id, contentData) {
       // Give the DOM some time for repositioning, takes longer for fullscreen on mobile
       setTimeout(() => {
         if (this.bubbleEndscreen !== undefined) {
+          console.log("here2");
           this.bubbleEndscreen.update();
         }
       }, 225);
@@ -629,10 +632,12 @@ InteractiveVideo.prototype.getCurrentState = function () {
   if (!self.video.play) {
     return; // Missing video
   }
-
+  
   var state = {
     progress: self.video.getCurrentTime(),
     answers: [],
+    score : [],
+    
     interactionsProgress: self.interactions
       .slice()
       .sort((a, b) => a.getDuration().from - b.getDuration().from)
@@ -643,10 +648,14 @@ InteractiveVideo.prototype.getCurrentState = function () {
   if (self.interactions !== undefined) {
     for (let i = 0; i < self.interactions.length; i++) {
       state.answers[i] = self.interactions[i].getCurrentState();
+      const instance = self.interactions[i].getInstance();
+      const score = instance.getScore ? instance.getScore() : undefined;
+      if(self.interactions[i].getProgress() !== undefined && state.answers[i].progress == undefined && score != null)
+        state.score[i] = score;
     }
   }
-
-  if (state.progress) {
+  console.log(state.score);
+  if (state.progress && state.progress > 0) {
     return state;
   }
   else if (self.previousState && self.previousState.progress) {
@@ -925,6 +934,7 @@ InteractiveVideo.prototype.addControls = function () {
   this.addBubbles();
 
   this.trigger('controls');
+
 };
 
 /**
@@ -956,6 +966,8 @@ InteractiveVideo.prototype.loaded = function () {
     }
   }
 
+ 
+  
   // Add summary interaction
   if (this.hasMainSummary()) {
     var displayAt = duration - this.options.summary.displayAt;
@@ -1233,6 +1245,7 @@ InteractiveVideo.prototype.addEndscreenMarkers = function () {
  * Add bubbles for answered interactions score and endscreen
  */
 InteractiveVideo.prototype.addBubbles = function () {
+  console.log("bubble here");
   if (!this.editor && this.hasStar) {
 
     // Score bubble
@@ -1254,7 +1267,29 @@ InteractiveVideo.prototype.addBubbles = function () {
         tableRowSummaryWithoutScore: this.l10n.endCardTableRowSummaryWithoutScore
       }
     });
-    this.endscreen.update(this.interactions);
+
+    // if (self.options.assets.interactions) {
+    //   for (var i = 0; i < self.options.assets.interactions.length; i++) {
+    //     var stateScore2;
+    //       if (self.previousState.score !== undefined && self.previousState.score[i] !== null) {
+    //         stateScore2 = self.previousState.score[i];
+    //         console.log("test1");
+    //         console.log(stateScore2);
+    //         console.log("test2");
+    //         console.log(this.bubbleEndscreen);
+    //        // setTimeout(function () {
+    //           // console.log("test3");
+    //           if (this.bubbleEndscreen !== undefined) {
+    //             console.log("test4");
+    //             // console.log(this.bubbleEndscreen);
+    //             this.bubbleEndscreen.update(this.interactions, stateScore2);
+    //           }
+    //        // }, 3000);
+    //       }
+    //     }
+    // }
+
+  this.endscreen.update(this.interactions);
 
     this.bubbleEndscreen = new Bubble(
       this.$star,
@@ -1266,6 +1301,7 @@ InteractiveVideo.prototype.addBubbles = function () {
         mode: 'full'
       }
     );
+    console.log("bubble here 2");
   }
 };
 
@@ -2764,7 +2800,7 @@ InteractiveVideo.prototype.resize = function () {
 
   if (this.bubbleScore) {
     this.bubbleScore.update();
-    this.bubbleEndscreen.update();
+    this.bubbleEndscreen.update([]);
   }
 
   this.resizeInteractions();

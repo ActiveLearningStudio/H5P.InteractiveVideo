@@ -267,15 +267,22 @@ class Endscreen extends H5P.EventDispatcher {
     this.answered = interactions
       .filter(interaction => interaction.getProgress() !== undefined)
       .sort((a, b) => a.getDuration().from - b.getDuration().from);
-
     this.$endscreenBottomTable.empty();
-
     // No chaining because we need the variable later
-    this.answered.forEach(interaction => {
+    this.answered.forEach((interaction, index) => {
       const time = interaction.getDuration().from;
       const title = this.getDescription(interaction);
       const instance = interaction.getInstance();
-      const score = instance.getScore ? instance.getScore() : undefined;
+      var score = instance.getScore ? instance.getScore() : undefined;
+
+      if ( this.parent.previousState !== undefined && this.parent.previousState.score !== undefined && this.parent.previousState.score[index] !== null) {
+        if(this.parent.previousState.score[index] > score)
+          score = this.parent.previousState.score[index];
+       }
+
+       if(score > 0 && this.parent.previousState != undefined && score != null)
+          this.parent.previousState.score[index] = score;
+       console.log(time, title, score);
       const maxScore = instance.getMaxScore ? instance.getMaxScore() : undefined;
       this.$endscreenBottomTable.append(this.buildTableRow(time, title, score, maxScore));
     });
