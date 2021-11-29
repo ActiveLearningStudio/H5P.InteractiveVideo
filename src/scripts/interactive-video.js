@@ -3598,8 +3598,11 @@ InteractiveVideo.prototype.resetTask = function () {
   if (this.controls === undefined) {
     return; // Content has not been used
   }
-
-  this.seek(0); // Rewind
+  // Rewind only if unable to find current time of video or current video time is not (0)
+  // Not Required to rewind if video already at (0)
+  if (!this.video.getCurrentTime || this.video.getCurrentTime() !== 0) {
+    this.seek(0); // Rewind
+  }
   this.timeUpdate(-1);
   this.controls.$slider.slider('option', 'value', 0);
 
