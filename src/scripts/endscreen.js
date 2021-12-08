@@ -161,7 +161,7 @@ class Endscreen extends H5P.EventDispatcher {
     for (const iv_interaction of this.parent.interactions) {
       if(typeof iv_interaction.getLastXAPIVerb() != "undefined") {
         console.log(iv_interaction.getLastXAPIVerb());
-       
+      
       }
       else{
         //this.parent.triggerXAPIScored(this.parent.getUsersScore(), this.parent.getUsersMaxScore(), 'skipped');
@@ -274,16 +274,20 @@ class Endscreen extends H5P.EventDispatcher {
       const title = this.getDescription(interaction);
       const instance = interaction.getInstance();
       var score = instance.getScore ? instance.getScore() : undefined;
-
+      var maxScore = instance.getMaxScore ? instance.getMaxScore() : undefined;
       if ( this.parent.previousState !== undefined && this.parent.previousState.score !== undefined && this.parent.previousState.score[index] !== null) {
         if(this.parent.previousState.score[index] > score)
           score = this.parent.previousState.score[index];
        }
+       if ( this.parent.previousState !== undefined && this.parent.previousState.maxScore !== undefined && this.parent.previousState.maxScore[index] !== null) {
+        if(this.parent.previousState.maxScore[index] > maxScore)
+          maxScore = this.parent.previousState.maxScore[index];
+       }
 
-       if(score > 0 && this.parent.previousState != undefined && score != null)
-          this.parent.previousState.score[index] = score;
-       console.log(time, title, score);
-      const maxScore = instance.getMaxScore ? instance.getMaxScore() : undefined;
+      //  if(score > 0 && this.parent.previousState != undefined && score != null)
+      //     this.parent.previousState.score[index] = score;
+        
+    
       this.$endscreenBottomTable.append(this.buildTableRow(time, title, score, maxScore));
     });
 

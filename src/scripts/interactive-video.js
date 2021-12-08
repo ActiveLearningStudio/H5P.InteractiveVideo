@@ -637,6 +637,7 @@ InteractiveVideo.prototype.getCurrentState = function () {
     progress: self.video.getCurrentTime(),
     answers: [],
     score : [],
+    maxScore : [],
     
     interactionsProgress: self.interactions
       .slice()
@@ -650,11 +651,15 @@ InteractiveVideo.prototype.getCurrentState = function () {
       state.answers[i] = self.interactions[i].getCurrentState();
       const instance = self.interactions[i].getInstance();
       const score = instance.getScore ? instance.getScore() : undefined;
-      if(self.interactions[i].getProgress() !== undefined && state.answers[i].progress == undefined && score != null)
+      const maxScore = instance.getMaxScore ? instance.getMaxScore() : undefined;
+      if(self.interactions[i].getProgress() !== undefined)
+      {
         state.score[i] = score;
+        state.maxScore[i] = maxScore;
+      }
+        // state.score[i] = score;
     }
   }
-  console.log(state.score);
   if (state.progress && state.progress > 0) {
     return state;
   }
@@ -3129,11 +3134,17 @@ InteractiveVideo.prototype.getUsersScore = function () {
   var score = 0;
 
   for (var i = 0; i < this.interactions.length; i++) {
-    if (this.interactions[i].score) {
+
+    var checkSumamry= true;
+    if(this.interactions[i].$menuitem != undefined && this.interactions[i].$menuitem[0] && this.interactions[i].$menuitem[0].ariaLabel && this.interactions[i].$menuitem[0].ariaLabel == "Interaction. Open summary dialog")
+        checkSumamry = false;
+
+    if (this.interactions[i].score && checkSumamry) {
       score += this.interactions[i].score;
+      if(score== 0 && this.previousState !== undefined && this.previousState.score !== undefined && this.parent.previousState.score[i] !== null)
+        score += this.previousState.score[i];
     }
   }
-
   return score;
 };
 
@@ -3145,7 +3156,12 @@ InteractiveVideo.prototype.getUsersMaxScore = function () {
   var maxScore = 0;
 
   for (var i = 0; i < this.interactions.length; i++) {
-    if (this.interactions[i].maxScore) {
+    //console.log(this.interactions[i]);
+    var checkSumamry= true;
+    if(this.interactions[i].$menuitem != undefined && this.interactions[i].$menuitem[0] && this.interactions[i].$menuitem[0].ariaLabel && this.interactions[i].$menuitem[0].ariaLabel == "Interaction. Open summary dialog")
+        checkSumamry = false;
+
+    if (this.interactions[i].maxScore && checkSumamry) {
       maxScore += this.interactions[i].maxScore;
     }
   }
@@ -3840,11 +3856,14 @@ const getAndIncrementGlobalCounter = () => {
  * @see contract at {@link https://h5p.org/documentation/developers/contracts#guides-header-6}
  */
 InteractiveVideo.prototype.getXAPIData = function () {
+
+  // console.log(self.getScore(),self.getMaxScore());
+
   var self = this;
   var xAPIEvent = this.createXAPIEventTemplate('answered');
   addQuestionToXAPI(xAPIEvent);
-  xAPIEvent.setScoredResult(self.getScore(),
-    self.getMaxScore(),
+  xAPIEvent.setScoredResult(4,//self.getScore(),
+    4,//self.getMaxScore(),
     self,
     true,
     self.getScore() === self.getMaxScore()

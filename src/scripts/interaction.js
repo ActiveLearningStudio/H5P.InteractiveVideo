@@ -1443,7 +1443,7 @@ function Interaction(parameters, player, previousState) {
           var isInteractiveVideoParent = parents.some(function (parent) {
             return parent.id === interactiveVideoId;
           });
-
+// console.log(instance);
           // Update scores on any action, overwrite with event score if it exists
           if (instance.getScore) {
             self.score = instance.getScore();
