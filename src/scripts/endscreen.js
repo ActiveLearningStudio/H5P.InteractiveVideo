@@ -151,13 +151,13 @@ class Endscreen extends H5P.EventDispatcher {
      * This is subject to being changed.
      */
 
-    
-      
-        
-       
 
-    
-    this.parent.triggerXAPIScored(this.parent.getUsersScore(), this.parent.getUsersMaxScore(), 'completed');
+
+
+
+
+    const scoreDetails = this.getScoreDetails();
+    this.parent.triggerXAPIScored(scoreDetails.score, scoreDetails.maxScore, 'completed');
     for (const iv_interaction of this.parent.interactions) {
       if(typeof iv_interaction.getLastXAPIVerb() != "undefined") {
         console.log(iv_interaction.getLastXAPIVerb());
@@ -180,7 +180,7 @@ class Endscreen extends H5P.EventDispatcher {
     }
     
     if( typeof this.parent.contentData.standalone !== undefined && this.parent.contentData.standalone){
-      this.parent.triggerXAPIScored(this.parent.getUsersScore(), this.parent.getUsersMaxScore(), 'submitted-curriki');
+      this.parent.triggerXAPIScored(scoreDetails.score, scoreDetails.maxScore, 'submitted-curriki');
     }
     
   }
@@ -329,6 +329,39 @@ class Endscreen extends H5P.EventDispatcher {
     }
     else {
       this.$submitButton.focus();
+    }
+  }
+
+  /**
+   * This method is used to get score and max score
+   * @returns {{score: number, maxScore: number}}
+   */
+  getScoreDetails() {
+    let totalScore = 0;
+    let totalMaxScore = 0;
+    this.answered.forEach((interaction, index) => {
+      const instance = interaction.getInstance();
+      let score = instance.getScore ? instance.getScore() : 0;
+      var maxScore = instance.getMaxScore ? instance.getMaxScore() : 0;
+      const currentState = instance.getCurrentState();
+      if (!currentState || currentState.length === undefined || currentState.length === 0) {
+
+        if (this.parent.previousState !== undefined && this.parent.previousState.score !== undefined && this.parent.previousState.score[index] !== null) {
+          if (this.parent.previousState.score[index] > score)
+            score = this.parent.previousState.score[index];
+        }
+
+        if (this.parent.previousState !== undefined && this.parent.previousState.maxScore !== undefined && this.parent.previousState.maxScore[index] !== null) {
+          if (this.parent.previousState.maxScore[index] > maxScore)
+            maxScore = this.parent.previousState.maxScore[index];
+        }
+      }
+      totalScore += score;
+      totalMaxScore += maxScore;
+    });
+    return {
+      score: totalScore,
+      maxScore: totalMaxScore
     }
   }
 }
