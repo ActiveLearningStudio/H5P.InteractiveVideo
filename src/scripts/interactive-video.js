@@ -3611,9 +3611,27 @@ InteractiveVideo.prototype.pause = function () {
  * Reset all interaction progress and answers
  */
 InteractiveVideo.prototype.resetTask = function () {
+
+  // Reset progress
+  this.interactionsProgress = [];
+
+  // Reset tasks
+  for (var i = 0; i < this.interactions.length; i++) {
+    this.interactions[i].resetTask();
+  }
+
+  // Hide end-screen if visible
+  if (this.bubbleEndscreen !== undefined) {
+    this.bubbleEndscreen.toggle(false, false);
+  }
+
   if (this.controls === undefined) {
     return; // Content has not been used
   }
+
+  // Recreate slider interactions
+  this.addSliderInteractions();
+
   // Rewind only if unable to find current time of video or current video time is not (0)
   // Not Required to rewind if video already at (0)
   if (!this.video.getCurrentTime || this.video.getCurrentTime() !== 0) {
@@ -3621,10 +3639,6 @@ InteractiveVideo.prototype.resetTask = function () {
   }
   this.timeUpdate(-1);
   this.controls.$slider.slider('option', 'value', 0);
-
-  for (var i = 0; i < this.interactions.length; i++) {
-    this.interactions[i].resetTask();
-  }
 };
 
 /**
