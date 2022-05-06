@@ -276,7 +276,7 @@ class Endscreen extends H5P.EventDispatcher {
       var score = instance.getScore ? instance.getScore() : undefined;
       var maxScore = instance.getMaxScore ? instance.getMaxScore() : undefined;
       if ( this.parent.previousState !== undefined && this.parent.previousState.score !== undefined && this.parent.previousState.score[index] !== null) {
-        if(this.parent.previousState.score[index] > score)
+        if(score === 0 && this.parent.previousState.score[index] > score)
           score = this.parent.previousState.score[index];
        }
        if ( this.parent.previousState !== undefined && this.parent.previousState.maxScore !== undefined && this.parent.previousState.maxScore[index] !== null) {
