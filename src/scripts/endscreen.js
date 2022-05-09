@@ -275,7 +275,9 @@ class Endscreen extends H5P.EventDispatcher {
       const instance = interaction.getInstance();
       var score = instance.getScore ? instance.getScore() : undefined;
       var maxScore = instance.getMaxScore ? instance.getMaxScore() : undefined;
-      if ( this.parent.previousState !== undefined && this.parent.previousState.score !== undefined && this.parent.previousState.score[index] !== null) {
+      var library = instance.libraryInfo.machineName;
+      // skipping true false library as previous state already gets updated during initialization
+      if (library !== 'H5P.TrueFalse' && this.parent.previousState !== undefined && this.parent.previousState.score !== undefined && this.parent.previousState.score[index] !== null) {
         if(score === 0 && this.parent.previousState.score[index] > score)
           score = this.parent.previousState.score[index];
        }
