@@ -1160,7 +1160,7 @@ InteractiveVideo.prototype.hasMainSummary = function () {
 InteractiveVideo.prototype.addSliderInteractions = function () {
   const self = this;
   // Remove old dots
-  this.controls.$interactionsContainer.children().remove();
+  // this.controls.$interactionsContainer.children().remove();
 
   // Add new dots
   H5P.jQuery.extend([], this.interactions)
@@ -1168,9 +1168,14 @@ InteractiveVideo.prototype.addSliderInteractions = function () {
     .forEach(interaction => {
       const $menuitem = interaction.addDot();
       self.menuitems.push($menuitem);
+
       if (self.previousState === undefined) {
         self.interactionsProgress.push(undefined);
       }
+      // if (self.previousState != undefined && self.interactionsProgress[self.menuitems.length - 1] != null) {
+      //   interaction.setProgress(self.interactionsProgress[self.menuitems.length - 1]);
+      //   interaction.$menuitem.addClass('h5p-interaction-answered');
+      // }
       if (self.interactionsProgress[self.menuitems.length - 1] === Interaction.PROGRESS_ANSWERED) {
         interaction.setProgress(self.interactionsProgress[self.menuitems.length - 1]);
         $menuitem.addClass('h5p-interaction-answered');
