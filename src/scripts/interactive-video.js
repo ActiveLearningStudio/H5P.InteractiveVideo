@@ -41,8 +41,6 @@ function InteractiveVideo(params, id, contentData) {
   var self = this;
   var startAt;
   var loopVideo;
-
-
   // Inheritance
   H5P.EventDispatcher.call(self);
 
@@ -737,7 +735,10 @@ InteractiveVideo.prototype.attach = function ($container) {
 
   // Show the score star if there are endscreens and interactions available
   this.hasStar = this.editor || (this.options.assets.endscreens !== undefined && this.options.assets.endscreens.length) && isAnswerable;
-
+if(this.parent != null && !this.editor)
+{
+  this.hasStar = false;
+}
   // Video with interactions
   this.attachVideo(this.$videoWrapper);
 
@@ -1381,7 +1382,6 @@ InteractiveVideo.prototype.addBubbles = function () {
         mode: 'full'
       }
     );
-    console.log("bubble here 2");
   }
 };
 
@@ -1779,7 +1779,7 @@ InteractiveVideo.prototype.addBookmark = function (id, tenth) {
  * @returns {H5P.jQuery}
  */
 InteractiveVideo.prototype.addEndscreen = function (id, tenth) {
-    if(typeof this.parent !== 'undefined'){
+    if(typeof this.parent !== 'undefined' || this.parent !== null){
         return false;
     }
   var self = this;
@@ -1882,13 +1882,12 @@ InteractiveVideo.prototype.addEndscreen = function (id, tenth) {
  */
 InteractiveVideo.prototype.attachControls = function ($wrapper) {
   var self = this;
-
   // The controls consist of four different sections:
   var $left = $('<div/>', {'class': 'h5p-controls-left', appendTo: $wrapper});
   var $slider = $('<div/>', {'class': 'h5p-control h5p-slider', appendTo: $wrapper});
   // True will be replaced by boolean variable, e.g. endScreenAvailable
 
-  if (self.hasStar) {
+  if (self.hasStar ) {
     self.$star = $('<div/>', {'class': 'h5p-control h5p-star', appendTo: $wrapper});
     self.$starBar = $('<div/>', {'class': 'h5p-control h5p-star h5p-star-bar', appendTo: self.$star});
     $('<div/>', {'class': 'h5p-control h5p-star h5p-star-background', appendTo: self.$star});
