@@ -735,10 +735,10 @@ InteractiveVideo.prototype.attach = function ($container) {
 
   // Show the score star if there are endscreens and interactions available
   this.hasStar = this.editor || (this.options.assets.endscreens !== undefined && this.options.assets.endscreens.length) && isAnswerable;
-if(this.parent != null && !this.editor)
-{
-  this.hasStar = false;
-}
+// if(this.parent != null && !this.editor)
+// {
+//   this.hasStar = false;
+// }
   // Video with interactions
   this.attachVideo(this.$videoWrapper);
 
