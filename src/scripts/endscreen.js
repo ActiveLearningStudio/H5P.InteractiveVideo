@@ -49,6 +49,8 @@ class Endscreen extends H5P.EventDispatcher {
     this.isSubmitButtonEnabled = this.parent.isSubmitButtonEnabled;
 
     this.buildDOM();
+
+    this.registerTurnInCancelled(parent, this);
   }
 
   /**
@@ -375,6 +377,15 @@ class Endscreen extends H5P.EventDispatcher {
       score: totalScore,
       maxScore: totalMaxScore
     }
+  }
+
+  registerTurnInCancelled(parent, that) {
+    parent.on('turnInCancelled', function() {
+      if (that.$submitButtonContainer.hasClass(ENDSCREEN_STYLE_BUTTON_HIDDEN)) {
+        that.$submitButtonContainer.removeClass(ENDSCREEN_STYLE_BUTTON_HIDDEN);
+      }
+      that.$endscreenIntroductionText.html('');
+    });
   }
 }
 
