@@ -6,7 +6,7 @@ import Interaction from './interaction';
 import Accessibility from './accessibility';
 import Bubble from './bubble';
 import Endscreen from './endscreen';
-
+import axios from 'axios';
 const $ = H5P.jQuery;
 
 const SECONDS_IN_MINUTE = 60;
@@ -821,7 +821,6 @@ InteractiveVideo.prototype.attach = function ($container) {
     if (ignoreEventForShortcutKey(e, '$play')) {
       return;
     }
-
     if (that.hasUncompletedRequiredInteractions()) {
       const $currentFocus = $(document.activeElement);
       const $mask = that.showWarningMask();
@@ -833,12 +832,18 @@ InteractiveVideo.prototype.attach = function ($container) {
   });
 
   this.$container.append($(this.accessibility.getInteractionAnnouncer()));
-
-  this.currentState = InteractiveVideo.ATTACHED;
-
+  
+  this.currentState = InteractiveVideo.ATTACHED; 
   if (this.autoplay) {
     that.video.play();
   }
+    that.video.pause();
+    that.showOverlayMask();
+    that.showWaitingMask();
+
+    setInterval(function() {
+     that.checkTeacherResponse();
+    },10000);
 };
 
 /**
@@ -3459,6 +3464,48 @@ InteractiveVideo.prototype.showWarningMask = function () {
 
   return self.$mask;
 };
+
+InteractiveVideo.prototype.showWaitingMask = function () {
+  const self = this;
+  const warningTextId = `interactive-video-${self.contentId}-${self.instanceIndex}-completion-warning-text`;
+
+  // create mask if doesn't exist
+  if (!self.$mask) {
+    self.$mask = $(
+      `<div class="h5p-warning-mask" role="alertdialog" aria-describedby="${warningTextId}">
+        <div class="h5p-warning-mask-wrapper">
+          <div id="${warningTextId}" class="h5p-warning-mask-content">Please Wait </div>
+        </div>
+      </div>`
+    ).click(function () {
+      self.$mask.hide();
+    }).appendTo(self.$container);
+  }
+
+  self.$mask.show();
+  self.$mask.find('.h5p-button-back').focus();
+  return self.$mask;
+};
+
+InteractiveVideo.prototype.checkTeacherResponse = function(){
+  const that = this;
+    axios.get('https://jsonplaceholder.typicode.com/users/1')
+    .then(function (response) {
+      var nmbr = Math.floor(Math.random() * 10);
+      if(nmbr === 1)
+      {
+          that.video.play();
+          that.hideOverlayMask();
+      }else{
+          that.video.pause();
+          that.showOverlayMask();
+      }
+    })
+    .catch(function (error) { 
+      that.video.pause();
+      that.showOverlayMask();
+    });
+}
 
 /**
  * Sets aria-disabled and removes tabindex from an element
