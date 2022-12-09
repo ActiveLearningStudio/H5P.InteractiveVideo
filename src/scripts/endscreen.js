@@ -138,14 +138,13 @@ class Endscreen extends H5P.EventDispatcher {
     }
     this.$submitButtonContainer.addClass(ENDSCREEN_STYLE_BUTTON_HIDDEN);
     this.$endscreenIntroductionText.html(`<div class="${ENDSCREEN_STYLE_BASE}-introduction-text-submitted">${this.l10n.submitMessage}</div>`);
-
     this.answered.forEach(interaction => {
       /*
        * We only need to fire an xAPI answered statement if the user
        * interacted with the content and the content has not sent it so far
        * itself.
        */
-      if (interaction.getLastXAPIVerb() !== 'completed' && interaction.getLastXAPIVerb() !== 'answered') {
+      if (interaction.getXAPIData() != undefined && interaction.getLastXAPIVerb() !== 'completed' && interaction.getLastXAPIVerb() !== 'answered') {
         const xAPIEvent = new H5P.XAPIEvent();
         xAPIEvent.data.statement = interaction.getXAPIData().statement;
         interaction.setLastXAPIVerb(xAPIEvent.getVerb());
@@ -373,6 +372,9 @@ class Endscreen extends H5P.EventDispatcher {
       totalScore += score;
       totalMaxScore += maxScore;
     });
+    if(totalMaxScore == 0){
+      totalMaxScore = 1;
+    }
     return {
       score: totalScore,
       maxScore: totalMaxScore
