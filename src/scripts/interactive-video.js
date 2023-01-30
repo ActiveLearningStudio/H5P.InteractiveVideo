@@ -1779,7 +1779,7 @@ InteractiveVideo.prototype.addBookmark = function (id, tenth) {
  * @returns {H5P.jQuery}
  */
 InteractiveVideo.prototype.addEndscreen = function (id, tenth) {
-    if(typeof this.parent !== 'undefined' || this.parent !== null){
+    if(typeof this.parent !== 'undefined' && this.parent !== null){
         return false;
     }
   var self = this;
